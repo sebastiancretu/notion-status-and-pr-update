@@ -1,0 +1,15 @@
+# Misc stuff
+node_modules/
+
+# TS output dir
+dist/
+out/
+
+# TS --incremental file
+tsconfig.tsbuildinfo
+
+# Tests
+coverage
+
+# Environment variables
+.env
