@@ -1,3 +1,12 @@
+## [1.0.5](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.4...v1.0.5) (2023-02-11)
+
+
+### Bug Fixes
+
+* gitignore ([aad2af5](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/aad2af57225599e03e3f3e8e5b1551861777de5a))
+* release ([88da4ab](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/88da4abbe78299301e52fd0eb66eaab8cc7a2c88))
+* release ([773411e](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/773411e655ea1741f20ec5a08d670c44702f8628))
+
 ## [1.0.4](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.3...v1.0.4) (2023-02-11)
 
 
