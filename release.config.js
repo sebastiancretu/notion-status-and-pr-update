@@ -6,7 +6,8 @@ module.exports = {
       prerelease: true,
     },
   ],
-  repositoryUrl: 'https://github.com/sebastiancretu/bare-github-action',
+  repositoryUrl:
+    'https://github.com/sebastiancretu/notion-status-and-pr-update',
   plugins: [
     [
       '@semantic-release/commit-analyzer',
