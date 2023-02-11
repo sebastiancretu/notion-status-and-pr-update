@@ -10,6 +10,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
     'prettier',
   ],
   parser: '@typescript-eslint/parser',
@@ -19,6 +20,7 @@ module.exports = {
   },
   plugins: ['import', '@typescript-eslint'],
   rules: {
+    indent: 'off',
     'import/order': [
       'error',
       {
@@ -38,7 +40,14 @@ module.exports = {
         'newlines-between': 'always',
       },
     ],
-    indent: ['error', 2],
+    indent: [
+      'error',
+      2,
+      {
+        SwitchCase: 1,
+        ignoredNodes: ['ConditionalExpression'],
+      },
+    ],
     'linebreak-style': ['error', 'unix'],
     quotes: ['error', 'single'],
     semi: ['error', 'always'],
