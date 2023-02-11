@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.1...v1.0.2) (2023-02-11)
+
+
+### Bug Fixes
+
+* added action.yml ([b5eb597](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/b5eb5975021a7975965c7a3f574ab0c417234d8d))
+
 ## [1.0.1](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.0...v1.0.1) (2023-02-11)
 
 
