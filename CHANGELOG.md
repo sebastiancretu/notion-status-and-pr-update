@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.2...v1.0.3) (2023-02-11)
+
+
+### Bug Fixes
+
+* add vercel/ncc ([87b2d65](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/87b2d652efc9e6a6f145c959e9f2ac7b0d2d7925))
+
 ## [1.0.2](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.1...v1.0.2) (2023-02-11)
 
 
