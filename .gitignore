@@ -3,8 +3,8 @@ node_modules/
 .DS_Store
 
 # TS output dir
-dist/
-out/
+dist
+out
 
 # TS --incremental file
 tsconfig.tsbuildinfo

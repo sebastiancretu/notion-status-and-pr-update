@@ -1,0 +1,70 @@
+name: 'notion-status-and-pr-update'
+description: 'Automatically move notion tickets on activity and set PR'
+branding:
+  color: blue
+  icon: at-sign
+inputs:
+  right_delimiter:
+    description: 'Right Delimiter for notion URL tickets'
+    required: true
+  left_delimiter:
+    description: 'Left Delimiter for notion URL tickets'
+    required: true
+  notion_status_property:
+    description: 'Notion property name for the Status of the tickets'
+    required: true
+  notion_pr_property_name:
+    description: 'Name of the Notion Pull Request property'
+    required: false
+  notion_pr_id_column_name:
+    description: 'Identity column from the Notion Pull request list database'
+    required: false
+  draft:
+      description: 'Value of the status to put on the Notion Page when the PR state is `draft`'
+      required: false
+  merged:
+      description: 'Value of the status to put on the Notion Page when the PR state is `merged`'
+      required: false
+  assigned:
+      description: 'Value of the status to put on the Notion Page when the PR action is `assigned`'
+      required: false
+  unassigned:
+      description: 'Value of the status to put on the Notion Page when the PR action is `unassigned`'
+      required: false
+  labeled:
+      description: 'Value of the status to put on the Notion Page when the PR action is `labeled`'
+      required: false
+  unlabeled:
+      description: 'Value of the status to put on the Notion Page when the PR action is `unlabeled`'
+      required: false
+  opened:
+      description: 'Value of the status to put on the Notion Page when the PR action is `opened`'
+      required: false
+  edited:
+      description: 'Value of the status to put on the Notion Page when the PR action is `edited`'
+      required: false
+  closed:
+      description: 'Value of the status to put on the Notion Page when the PR action is `closed`'
+      required: false
+  reopened:
+      description: 'Value of the status to put on the Notion Page when the PR action is `reopened`'
+      required: false
+  synchronize:
+      description: 'Value of the status to put on the Notion Page when the PR action is `synchronize`'
+      required: false
+  ready_for_review:
+      description: 'Value of the status to put on the Notion Page when the PR action is `ready_for_review`'
+      required: false
+  locked:
+      description: 'Value of the status to put on the Notion Page when the PR action is `locked`'
+      required: false
+  unlocked:
+      description: 'Value of the status to put on the Notion Page when the PR action is `unlocked`'
+      required: false
+  review_requested:
+      description: 'Value of the status to put on the Notion Page when the PR action is `review_requested`'
+      required: false
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
