@@ -1,5 +1,5 @@
 {
-  "name": "bare-github-actions",
+  "name": "notion-status-and-pr-update",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
