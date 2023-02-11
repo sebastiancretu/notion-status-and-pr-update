@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.0...v1.0.1) (2023-02-11)
+
+
+### Bug Fixes
+
+* update dependabot interval ([b7e9c43](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/b7e9c43e6e5c2e2d6c28d3982ef21c44d9ec359b))
+
 ## 1.0.0 (2023-02-11)
 
 
