@@ -40,16 +40,8 @@ module.exports = {
         'newlines-between': 'always',
       },
     ],
-    indent: [
-      'error',
-      2,
-      {
-        SwitchCase: 1,
-        ignoredNodes: ['ConditionalExpression'],
-      },
-    ],
     'linebreak-style': ['error', 'unix'],
-    quotes: ['error', 'single'],
+    'prettier/prettier': ['error', { singleQuote: true }],
     semi: ['error', 'always'],
   },
 };

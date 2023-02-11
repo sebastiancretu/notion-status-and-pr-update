@@ -1,4 +1,6 @@
 import core from '@actions/core';
+
+import env from './config';
 import getInputs from './github';
 import {
   getPage,
@@ -7,7 +9,6 @@ import {
   getPullRequestPage,
   updatePullRequestPage,
 } from './notion';
-import env from './config';
 import { updateIssuePagePayload } from './payload';
 import { getUrlsFromString, getPageIds } from './utils';
 

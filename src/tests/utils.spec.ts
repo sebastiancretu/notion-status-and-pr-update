@@ -3,6 +3,8 @@ describe('util', () => {
   describe('getUrlsFromString', () => {
     const payload = {
       body: '',
+      left_delimiter: '](',
+      right_delimiter: ')',
     };
 
     it('should return empty array when no url present', async () => {
@@ -20,7 +22,6 @@ describe('util', () => {
       payload.body =
         'Lorem Ipsum is simply dummy text of [notion ticket](https://www.notion.so/sample/93a37ade33c44a8a9970a9d70c800d38?v=a6e53baea5c2294186465e5b6e567bc4&p=6fb007c7595b4034aadc0f3bdf77c2f0&pm=s)the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.';
       const urls = getUrlsFromString(payload);
-
       expect(urls).toHaveLength(1);
       expect(urls[0].href).toEqual(
         'https://www.notion.so/sample/93a37ade33c44a8a9970a9d70c800d38?v=a6e53baea5c2294186465e5b6e567bc4&p=6fb007c7595b4034aadc0f3bdf77c2f0&pm=s'
@@ -52,8 +53,8 @@ describe('util', () => {
     it('should return all notion types of urls with custom delimiters', async () => {
       const delimitersPayload = {
         body: 'Lorem Ipsum is simply dummy text of [https://www.notion.so/sample/93a37ade33c44a8a9970a9d70c800d38?v=a6e53baea5c2294186465e5b6e567bc4&p=6fb007c7595b4034aadc0f3bdf77c2f0&pm=s]the printing and typesetting [industry](https://www.notion.so/sample/Lorem-Ipsum-is-simply-dummy-text-of-notion-6fb007a3595b4034aadc0f3bdf22c2f0). Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.',
-        leftDelimiter: '[',
-        rightDelimiter: ']',
+        left_delimiter: '[',
+        right_delimiter: ']',
       };
       const urls = getUrlsFromString(delimitersPayload);
 

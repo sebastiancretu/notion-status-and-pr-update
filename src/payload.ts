@@ -3,6 +3,7 @@ import {
   QueryDatabaseParameters,
   UpdatePageParameters,
 } from '@notionhq/client/build/src/api-endpoints';
+
 import env from './config';
 import getInputs from './github';
 
@@ -81,6 +82,7 @@ export const updateIssuePagePayload = ({
  */
 export const addPullRequestPayload = (stateId: string) =>
   ({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     parent: { database_id: env.DATABASE_PR_ID! },
     icon: {
       external: {
@@ -119,6 +121,7 @@ export const addPullRequestPayload = (stateId: string) =>
  */
 export const getPullRequestPayload = () =>
   ({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     database_id: env.DATABASE_PR_ID!,
     filter: {
       and: [
@@ -140,6 +143,7 @@ export const getPullRequestPayload = () =>
  */
 export const getPullRequestStatePayload = () =>
   ({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     database_id: env.DATABASE_PR_STATE_ID!,
     filter: {
       and: [
