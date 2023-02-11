@@ -139,6 +139,12 @@ module.exports = {
       },
     ],
     [
+      '@semantic-release/exec',
+      {
+        prepare: 'npm run package',
+      },
+    ],
+    [
       '@semantic-release/git',
       {
         assets: [
