@@ -1,3 +1,20 @@
+## 1.0.0 (2023-02-11)
+
+
+### Bug Fixes
+
+* bumped prettier ([6fc2644](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/6fc2644c128f06053a3673c000eb278f0aec41d6))
+* eslint ident ([2cbe20b](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/2cbe20b075cb0e7f7e8637f0cfbbe73ddb231399))
+* repo url ([5bc5e03](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/5bc5e0347de8f4439d4f8763fca2b1513e8624a3))
+* resolved conflicts ([6d4aace](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/6d4aace1cd3c16a022365afdc06cb5bd29fcb7df))
+* tests ([d21f4f1](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/d21f4f151a33331afe407adce97bbd9cbee45b89))
+* updated package.json ([b9fd611](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/b9fd6115639f616de66c023165e7db2bcdbab1d9))
+
+
+### Features
+
+* implemented functionality ([5bec998](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/5bec998a594937a8f7731c716be28698f95a497b))
+
 ## 1.0.0 (2023-02-04)
 
 
