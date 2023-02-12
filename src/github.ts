@@ -31,7 +31,6 @@ interface NotionProperties {
  * @returns {Inputs}
  */
 const getInputs = (): Inputs => {
-  console.log(JSON.stringify(context));
   const pullRequest = context.payload.pull_request;
   const state = pullRequest?.merged
     ? 'merged'
@@ -49,6 +48,9 @@ const getInputs = (): Inputs => {
         required: false,
       }),
       pr_id_column_name: getInput('notion_pr_id_column_name', {
+        required: false,
+      }),
+      pr_state_column_name: getInput('notion_pr_state_column_name', {
         required: false,
       }),
       status: state && getInput(state, { required: false }),
