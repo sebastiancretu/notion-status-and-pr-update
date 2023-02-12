@@ -10855,11 +10855,12 @@ const github_1 = __importDefault(__nccwpck_require__(5438));
  * @returns {Inputs}
  */
 const getInputs = () => {
+    var _a;
     console.log(github_1.default);
     const pullRequest = github_1.default.context.payload.pull_request;
-    const state = pullRequest?.merged
+    const state = (pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.merged)
         ? 'merged'
-        : pullRequest?.draft
+        : (pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.draft)
             ? 'draft'
             : github_1.default.context.payload.action;
     return {
@@ -10878,11 +10879,11 @@ const getInputs = () => {
             status: state && core_1.default.getInput(state, { required: false }),
         },
         pull_request: {
-            body: pullRequest?.body ?? '',
-            href: pullRequest?.html_url,
-            number: Number(pullRequest?.number),
+            body: (_a = pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.body) !== null && _a !== void 0 ? _a : '',
+            href: pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.html_url,
+            number: Number(pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.number),
             state,
-            title: pullRequest?.title,
+            title: pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.title,
         },
     };
 };
@@ -10896,6 +10897,15 @@ exports["default"] = getInputs;
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10911,46 +10921,47 @@ const SupportedType = {
     relation: 'relation',
 };
 const inputs = (0, github_1.default)();
-const run = async () => {
+const run = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     const bodyPages = (0, utils_1.getUrlsFromString)({
-        body: inputs.pull_request?.body,
+        body: (_a = inputs.pull_request) === null || _a === void 0 ? void 0 : _a.body,
         left_delimiter: inputs.left_delimiter,
         right_delimiter: inputs.right_delimiter,
     });
     const pageIds = (0, utils_1.getPageIds)(bodyPages);
     for (const pageId of pageIds) {
         let payload = (0, payload_1.updateIssuePagePayload)({ page_id: pageId });
-        if (inputs.notion?.pr_property_name) {
+        if ((_b = inputs.notion) === null || _b === void 0 ? void 0 : _b.pr_property_name) {
             if (!config_1.default.DATABASE_PR_ID) {
                 core_1.default.setFailed('{{ vars.DATABASE_RELATION_ID }} variable not set.');
                 return;
             }
-            const page = await (0, notion_1.getPage)(pageId);
+            const page = yield (0, notion_1.getPage)(pageId);
             const prProperty = page.properties[inputs.notion.pr_property_name];
             if (prProperty.type === SupportedType.relation) {
                 let relation;
-                const currentPullRequest = await (0, notion_1.getPullRequestPage)();
+                const currentPullRequest = yield (0, notion_1.getPullRequestPage)();
                 if (!currentPullRequest) {
-                    relation = await (0, notion_1.addPullRequestPage)();
+                    relation = yield (0, notion_1.addPullRequestPage)();
                 }
                 else if (currentPullRequest) {
-                    relation = await (0, notion_1.updatePullRequestPage)(currentPullRequest.id);
+                    relation = yield (0, notion_1.updatePullRequestPage)(currentPullRequest.id);
                 }
-                payload = await (0, payload_1.updateIssuePagePayload)({
+                payload = yield (0, payload_1.updateIssuePagePayload)({
                     page_id: page.id,
                     state_id: relation.id,
                 });
             }
             if (prProperty.type === SupportedType.url) {
-                payload = await (0, payload_1.updateIssuePagePayload)({
+                payload = yield (0, payload_1.updateIssuePagePayload)({
                     page_id: page.id,
                     url: true,
                 });
             }
         }
-        await (0, notion_1.updatePage)(payload);
+        yield (0, notion_1.updatePage)(payload);
     }
-};
+});
 exports["default"] = run();
 
 
@@ -10961,6 +10972,15 @@ exports["default"] = run();
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10979,11 +10999,11 @@ const notion = new client_1.Client({
  * @returns {Promise<PageObjectResponse>}
  * @exports
  */
-const getPage = async (id) => {
-    return (await notion.pages.retrieve({
+const getPage = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    return (yield notion.pages.retrieve({
         page_id: id,
     }));
-};
+});
 exports.getPage = getPage;
 /**
  * Update a notion page based on payload.
@@ -10992,9 +11012,9 @@ exports.getPage = getPage;
  * @returns {Promise<UpdatePageResponse>}
  * @exports
  */
-const updatePage = async (payload) => {
-    return await notion.pages.update(payload);
-};
+const updatePage = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield notion.pages.update(payload);
+});
 exports.updatePage = updatePage;
 /**
  * Updating a page from the Pull Requests database.
@@ -11003,14 +11023,14 @@ exports.updatePage = updatePage;
  * @returns {Promise<PartialPageObjectResponse | undefined>}
  * @exports
  */
-const updatePullRequestPage = async (pageId) => {
-    const stateId = await (0, exports.getPullRequestState)();
+const updatePullRequestPage = (pageId) => __awaiter(void 0, void 0, void 0, function* () {
+    const stateId = yield (0, exports.getPullRequestState)();
     if (!stateId) {
         return;
     }
     const payload = (0, payload_1.updatePRPagePayload)(pageId, stateId);
-    return (await notion.pages.update(payload));
-};
+    return (yield notion.pages.update(payload));
+});
 exports.updatePullRequestPage = updatePullRequestPage;
 /**
  * Creating a new page in the Pull Requests database.
@@ -11018,14 +11038,14 @@ exports.updatePullRequestPage = updatePullRequestPage;
  * @returns {Promise<PageObjectResponse | undefined>}
  * @exports
  */
-const addPullRequestPage = async () => {
-    const stateId = await (0, exports.getPullRequestState)();
+const addPullRequestPage = () => __awaiter(void 0, void 0, void 0, function* () {
+    const stateId = yield (0, exports.getPullRequestState)();
     if (!stateId) {
         return;
     }
     const payload = (0, payload_1.addPullRequestPayload)(stateId);
-    return (await notion.pages.create(payload));
-};
+    return (yield notion.pages.create(payload));
+});
 exports.addPullRequestPage = addPullRequestPage;
 /**
  * Fetch a single page from the Pull Requests database.
@@ -11033,12 +11053,12 @@ exports.addPullRequestPage = addPullRequestPage;
  * @returns {Promise<PageObjectResponse>}
  * @exports
  */
-const getPullRequestPage = async () => {
+const getPullRequestPage = () => __awaiter(void 0, void 0, void 0, function* () {
     const payload = (0, payload_1.getPullRequestPayload)();
-    return await notion.databases
+    return yield notion.databases
         .query(payload)
         .then((r) => r.results.pop());
-};
+});
 exports.getPullRequestPage = getPullRequestPage;
 /**
  * Fetch a single State from the Pull Request States database.
@@ -11046,12 +11066,12 @@ exports.getPullRequestPage = getPullRequestPage;
  * @returns {Promise<string>}
  * @exports
  */
-const getPullRequestState = async () => {
+const getPullRequestState = () => __awaiter(void 0, void 0, void 0, function* () {
     const payload = (0, payload_1.getPullRequestStatePayload)();
-    const statePages = await notion.databases.query(payload);
+    const statePages = yield notion.databases.query(payload);
     const state = statePages.results.pop();
-    return state?.id;
-};
+    return state === null || state === void 0 ? void 0 : state.id;
+});
 exports.getPullRequestState = getPullRequestState;
 
 
@@ -11085,13 +11105,11 @@ const updatePRPagePayload = (pageId, stateId) => ({
             url: 'https://cdn.simpleicons.org/github/8B949E',
         },
     },
-    properties: {
-        ...(pageId && {
-            State: {
-                relation: [{ id: stateId }],
-            },
-        }),
-    },
+    properties: Object.assign({}, (pageId && {
+        State: {
+            relation: [{ id: stateId }],
+        },
+    })),
 });
 exports.updatePRPagePayload = updatePRPagePayload;
 /**
@@ -11102,28 +11120,25 @@ exports.updatePRPagePayload = updatePRPagePayload;
  * @returns {{ page_id: string; properties: { [x: string]: { status: { name: string | undefined; }; } | { url?: string | undefined; relation?: { ...; }[] | undefined; status?: undefined; }; }; }}
  * @exports
  */
-const updateIssuePagePayload = ({ page_id, state_id, url, }) => ({
-    page_id,
-    properties: {
-        ...(inputs.notion?.status_property && {
+const updateIssuePagePayload = ({ page_id, state_id, url, }) => {
+    var _a, _b, _c, _d;
+    return ({
+        page_id,
+        properties: Object.assign(Object.assign({}, (((_a = inputs.notion) === null || _a === void 0 ? void 0 : _a.status_property) && {
             [inputs.notion.status_property]: {
                 status: {
-                    name: inputs.notion?.status,
+                    name: (_b = inputs.notion) === null || _b === void 0 ? void 0 : _b.status,
                 },
             },
-        }),
-        ...(inputs.notion?.pr_property_name && {
-            [inputs.notion.pr_property_name]: {
-                ...(state_id && {
-                    relation: [{ id: state_id }],
-                }),
-                ...(url && {
-                    url: inputs.pull_request?.href,
-                }),
-            },
-        }),
-    },
-});
+        })), (((_c = inputs.notion) === null || _c === void 0 ? void 0 : _c.pr_property_name) && {
+            [inputs.notion.pr_property_name]: Object.assign(Object.assign({}, (state_id && {
+                relation: [{ id: state_id }],
+            })), (url && {
+                url: (_d = inputs.pull_request) === null || _d === void 0 ? void 0 : _d.href,
+            })),
+        })),
+    });
+};
 exports.updateIssuePagePayload = updateIssuePagePayload;
 /**
  * Payload for creating a new page in Pull Request database.
@@ -11132,37 +11147,35 @@ exports.updateIssuePagePayload = updateIssuePagePayload;
  * @returns {CreatePageBodyParameters}
  * @exports
  */
-const addPullRequestPayload = (stateId) => ({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    parent: { database_id: config_1.default.DATABASE_PR_ID },
-    icon: {
-        external: {
-            url: 'https://cdn.simpleicons.org/github/8B949E',
+const addPullRequestPayload = (stateId) => {
+    var _a, _b, _c;
+    return ({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        parent: { database_id: config_1.default.DATABASE_PR_ID },
+        icon: {
+            external: {
+                url: 'https://cdn.simpleicons.org/github/8B949E',
+            },
         },
-    },
-    properties: {
-        Title: {
-            title: [
-                {
-                    text: {
-                        content: inputs.pull_request?.title,
+        properties: Object.assign({ Title: {
+                title: [
+                    {
+                        text: {
+                            content: (_a = inputs.pull_request) === null || _a === void 0 ? void 0 : _a.title,
+                        },
                     },
-                },
-            ],
-        },
-        Number: {
-            number: inputs.pull_request?.number,
-        },
-        Link: {
-            url: inputs.pull_request?.href,
-        },
-        ...(stateId && {
+                ],
+            }, Number: {
+                number: (_b = inputs.pull_request) === null || _b === void 0 ? void 0 : _b.number,
+            }, Link: {
+                url: (_c = inputs.pull_request) === null || _c === void 0 ? void 0 : _c.href,
+            } }, (stateId && {
             State: {
                 relation: [{ id: stateId }],
             },
-        }),
-    },
-});
+        })),
+    });
+};
 exports.addPullRequestPayload = addPullRequestPayload;
 /**
  * Payload to return pages from Pull Request database
@@ -11170,20 +11183,23 @@ exports.addPullRequestPayload = addPullRequestPayload;
  * @returns {QueryDatabaseParameters}
  * @exports
  */
-const getPullRequestPayload = () => ({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    database_id: config_1.default.DATABASE_PR_ID,
-    filter: {
-        and: [
-            {
-                property: inputs.notion?.pr_id_column_name,
-                number: {
-                    equals: inputs.pull_request?.number,
+const getPullRequestPayload = () => {
+    var _a, _b;
+    return ({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        database_id: config_1.default.DATABASE_PR_ID,
+        filter: {
+            and: [
+                {
+                    property: (_a = inputs.notion) === null || _a === void 0 ? void 0 : _a.pr_id_column_name,
+                    number: {
+                        equals: (_b = inputs.pull_request) === null || _b === void 0 ? void 0 : _b.number,
+                    },
                 },
-            },
-        ],
-    },
-});
+            ],
+        },
+    });
+};
 exports.getPullRequestPayload = getPullRequestPayload;
 /**
  * Payload to return pages from Pull Request States database
@@ -11191,20 +11207,23 @@ exports.getPullRequestPayload = getPullRequestPayload;
  * @returns {QueryDatabaseParameters}
  * @exports
  */
-const getPullRequestStatePayload = () => ({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    database_id: config_1.default.DATABASE_PR_STATE_ID,
-    filter: {
-        and: [
-            {
-                property: inputs.notion?.pr_state_column_name,
-                title: {
-                    equals: inputs.pull_request?.state,
+const getPullRequestStatePayload = () => {
+    var _a, _b;
+    return ({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        database_id: config_1.default.DATABASE_PR_STATE_ID,
+        filter: {
+            and: [
+                {
+                    property: (_a = inputs.notion) === null || _a === void 0 ? void 0 : _a.pr_state_column_name,
+                    title: {
+                        equals: (_b = inputs.pull_request) === null || _b === void 0 ? void 0 : _b.state,
+                    },
                 },
-            },
-        ],
-    },
-});
+            ],
+        },
+    });
+};
 exports.getPullRequestStatePayload = getPullRequestStatePayload;
 
 
@@ -11256,8 +11275,11 @@ exports.getUrlsFromString = getUrlsFromString;
  * @exports
  */
 const getPageIds = (urls) => urls
-    .map((url) => new URLSearchParams(url.searchParams).get('p') ||
-    url.pathname.match(/\b[0-9a-f]{32}\b/g)?.pop())
+    .map((url) => {
+    var _a;
+    return new URLSearchParams(url.searchParams).get('p') ||
+        ((_a = url.pathname.match(/\b[0-9a-f]{32}\b/g)) === null || _a === void 0 ? void 0 : _a.pop());
+})
     .filter(Boolean);
 exports.getPageIds = getPageIds;
 const parseJson = (string) => {
