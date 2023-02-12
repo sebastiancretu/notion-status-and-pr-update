@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.6...v1.0.7) (2023-02-12)
+
+
+### Bug Fixes
+
+* added test workflow ([9478c37](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/9478c373aa12034f6e7d59252139f3806aac8595))
+
 ## [1.0.6](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.5...v1.0.6) (2023-02-12)
 
 
