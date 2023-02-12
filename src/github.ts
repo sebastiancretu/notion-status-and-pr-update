@@ -31,6 +31,7 @@ interface NotionProperties {
  * @returns {Inputs}
  */
 const getInputs = (): Inputs => {
+  console.log(JSON.stringify(context));
   const pullRequest = context.payload.pull_request;
   const state = pullRequest?.merged
     ? 'merged'
