@@ -19,6 +19,9 @@ inputs:
   notion_pr_id_column_name:
     description: 'Identity column from the Notion Pull request list database'
     required: false
+  notion_pr_state_column_name:
+    description: 'Column name from the Notion database that contains PR states'
+    required: false
   draft:
       description: 'Value of the status to put on the Notion Page when the PR state is `draft`'
       required: false
