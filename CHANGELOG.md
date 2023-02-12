@@ -1,3 +1,10 @@
+## [1.0.11](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.10...v1.0.11) (2023-02-12)
+
+
+### Bug Fixes
+
+* added new input ([206b109](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/206b1093e29013f9cd80134559c890dd7dc76437))
+
 ## [1.0.10](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.9...v1.0.10) (2023-02-12)
 
 
