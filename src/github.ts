@@ -1,7 +1,7 @@
 import { getInput } from '@actions/core';
 import { context } from '@actions/github';
 
-type GithubContext = typeof context;
+// type GithubContext = typeof context;
 
 interface Inputs {
   readonly right_delimiter: string;
