@@ -1,5 +1,7 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import { getInput } from '@actions/core';
+import { context } from '@actions/github';
+
+type GithubContext = typeof context;
 
 interface Inputs {
   readonly right_delimiter: string;
@@ -29,27 +31,26 @@ interface NotionProperties {
  * @returns {Inputs}
  */
 const getInputs = (): Inputs => {
-  console.log(github);
-  const pullRequest = github.context.payload.pull_request;
+  const pullRequest = context.payload.pull_request;
   const state = pullRequest?.merged
     ? 'merged'
     : pullRequest?.draft
     ? 'draft'
-    : github.context.payload.action;
+    : context.payload.action;
   return {
-    right_delimiter: core.getInput('right_delimiter', { required: true }),
-    left_delimiter: core.getInput('left_delimiter', { required: true }),
+    right_delimiter: getInput('right_delimiter', { required: true }),
+    left_delimiter: getInput('left_delimiter', { required: true }),
     notion: {
-      status_property: core.getInput('notion_status_property', {
+      status_property: getInput('notion_status_property', {
         required: true,
       }),
-      pr_property_name: core.getInput('notion_pr_property_name', {
+      pr_property_name: getInput('notion_pr_property_name', {
         required: false,
       }),
-      pr_id_column_name: core.getInput('notion_pr_id_column_name', {
+      pr_id_column_name: getInput('notion_pr_id_column_name', {
         required: false,
       }),
-      status: state && core.getInput(state, { required: false }),
+      status: state && getInput(state, { required: false }),
     },
     pull_request: {
       body: pullRequest?.body ?? '',
