@@ -1,3 +1,12 @@
+## [1.0.8](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.7...v1.0.8) (2023-02-12)
+
+
+### Bug Fixes
+
+* added test workflow ([c2bad6a](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/c2bad6a44130e58f0ae0bf9d22552bc178eec958))
+* added test workflow ([2c59cf8](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/2c59cf87ad7085560460aaf60c54b4e9763dc746))
+* added test workflow ([4247cdc](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/4247cdc09ae24ff23fe248b873bff3125581826a))
+
 ## [1.0.7](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.6...v1.0.7) (2023-02-12)
 
 
