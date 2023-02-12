@@ -1,4 +1,5 @@
 import core from '@actions/core';
+import { StatusPropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 import env from './config';
 import getInputs from './github';
@@ -10,7 +11,7 @@ import {
   updatePullRequestPage,
 } from './notion';
 import { updateIssuePagePayload } from './payload';
-import { getUrlsFromString, getPageIds } from './utils';
+import { getUrlsFromString, getPageIds, clean } from './utils';
 
 const SupportedType = {
   url: 'url',
@@ -29,15 +30,21 @@ type PropertyResponse = {
 const inputs = getInputs();
 
 const run = async (): Promise<void> => {
+  if (!inputs.notion.status) {
+    return;
+  }
   const bodyPages = getUrlsFromString({
     body: inputs.pull_request?.body,
     left_delimiter: inputs.left_delimiter,
     right_delimiter: inputs.right_delimiter,
   });
   const pageIds = getPageIds(bodyPages);
-
   for (const pageId of pageIds) {
+    const page = await getPage(pageId);
     let payload = updateIssuePagePayload({ page_id: pageId });
+    const currentPageStatus = page.properties[
+      inputs.notion?.status_property
+    ] as StatusPropertyItemObjectResponse;
 
     if (inputs.notion?.pr_property_name) {
       if (!env.DATABASE_PR_ID) {
@@ -45,7 +52,6 @@ const run = async (): Promise<void> => {
         return;
       }
 
-      const page = await getPage(pageId);
       const prProperty = page.properties[
         inputs.notion.pr_property_name
       ] as PropertyResponse;
@@ -53,7 +59,6 @@ const run = async (): Promise<void> => {
       if (prProperty.type === SupportedType.relation) {
         let relation;
         const currentPullRequest = await getPullRequestPage();
-
         if (!currentPullRequest) {
           relation = await addPullRequestPage();
         } else if (currentPullRequest) {
@@ -62,7 +67,7 @@ const run = async (): Promise<void> => {
 
         payload = await updateIssuePagePayload({
           page_id: page.id,
-          state_id: relation.id,
+          state_id: relation?.id,
         });
       }
 
@@ -74,7 +79,15 @@ const run = async (): Promise<void> => {
       }
     }
 
-    await updatePage(payload);
+    const cleanedPayload = clean(payload);
+
+    if (
+      inputs.notion.status !== currentPageStatus.status?.name ||
+      (inputs.notion?.pr_property_name &&
+        cleanedPayload.properties[inputs.notion?.pr_property_name])
+    ) {
+      await updatePage(cleanedPayload);
+    }
   }
 };
 

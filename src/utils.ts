@@ -1,5 +1,5 @@
 import core from '@actions/core';
-
+import { transform, isPlainObject, isEmpty } from 'lodash';
 /**
  * Gets all URL's from a string between two preset delimiters
  *
@@ -17,7 +17,7 @@ export const getUrlsFromString = ({
   right_delimiter: string;
 }): URL[] => {
   let startIndex = 0,
-    index;
+    index: number | undefined;
   const urls: URL[] = [];
   while ((index = body.indexOf(left_delimiter, startIndex)) > -1) {
     startIndex = index + 1;
@@ -63,4 +63,98 @@ export const parseJson = (string: string) => {
     core.setFailed(`${string} is an invalid json format`);
   }
   return;
+};
+
+/**
+ * Clean an object of emptyArrays, emptyObjects, emptyStrings, NaNValues, nullValues or undefinedValues
+ * @param o
+ * @param param1
+ * @returns
+ */
+export const clean = <T>(
+  o: T,
+  {
+    cleanKeys = [],
+    cleanValues = [],
+    emptyArrays = true,
+    emptyObjects = true,
+    emptyStrings = true,
+    NaNValues = true,
+    nullValues = true,
+    undefinedValues = true,
+  }: {
+    cleanKeys?: Array<string | number>;
+    cleanValues?: any[];
+    emptyArrays?: boolean;
+    emptyObjects?: boolean;
+    emptyStrings?: boolean;
+    NaNValues?: boolean;
+    nullValues?: boolean;
+    undefinedValues?: boolean;
+  } = {}
+): any => {
+  return transform(
+    o as unknown,
+    (result: any[], value: unknown, key: string | number) => {
+      // Exclude specific keys.
+      if (cleanKeys.includes(key)) {
+        return;
+      }
+
+      // Recurse into arrays and objects.
+      if (Array.isArray(value) || isPlainObject(value)) {
+        value = clean(value, {
+          NaNValues,
+          cleanKeys,
+          cleanValues,
+          emptyArrays,
+          emptyObjects,
+          emptyStrings,
+          nullValues,
+          undefinedValues,
+        });
+      }
+
+      // Exclude specific values.
+      if (cleanValues.includes(value)) {
+        return;
+      }
+
+      // Exclude empty objects.
+      if (emptyObjects && isPlainObject(value) && isEmpty(value)) {
+        return;
+      }
+
+      // Exclude empty arrays.
+      if (emptyArrays && Array.isArray(value) && !value.length) {
+        return;
+      }
+
+      // Exclude empty strings.
+      if (emptyStrings && value === '') {
+        return;
+      }
+
+      // Exclude NaN values.
+      if (NaNValues && Number.isNaN(value)) {
+        return;
+      }
+
+      // Exclude null values.
+      if (nullValues && value === null) {
+        return;
+      }
+
+      // Exclude undefined values.
+      if (undefinedValues && value === undefined) {
+        return;
+      }
+
+      // Append when recursing arrays.
+      if (Array.isArray(result)) {
+        return result.push(value);
+      }
+      result[key] = value;
+    }
+  );
 };

@@ -7,7 +7,7 @@
     "prepare": "husky install",
     "start": "npx ts-node --transpile-only src/index.ts",
     "build": "tsc",
-    "package": "ncc build --minify --license licenses.txt",
+    "package": "ncc build --license licenses.txt",
     "lint": "eslint ./src --ext .ts --ext .js",
     "lint:fix": "eslint ./src  --ext .ts --ext .js --fix",
     "test:unit": "jest --coverage --passWithNoTests",
@@ -43,6 +43,7 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^5.1.1",
-    "@notionhq/client": "^2.2.3"
+    "@notionhq/client": "^2.2.3",
+    "lodash": "^4.17.21"
   }
 }
