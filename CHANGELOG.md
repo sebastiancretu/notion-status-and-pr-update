@@ -1,3 +1,14 @@
+## [1.0.12](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.11...v1.0.12) (2023-02-15)
+
+
+### Bug Fixes
+
+* added default values for env variables ([401fd4d](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/401fd4db884417fa743eeac2d56a5bca56821b89))
+* added new validations ([ade4a56](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/ade4a569ab5cc0164e8e2b984c47c068e04c357f))
+* added some changes ([e4f1e46](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/e4f1e46964a13f4a2de922144e07f030269e3a1c))
+* remove import core ([d305741](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/d305741a4e0fd29fbf728bfcbfdf89bd690a2f09))
+* unit test ([824d624](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/824d624bc72c8707b86d2d9e426e932b7bdeb29a))
+
 ## [1.0.11](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.10...v1.0.11) (2023-02-12)
 
 
