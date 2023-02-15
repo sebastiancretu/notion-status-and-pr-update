@@ -67,7 +67,7 @@ const run = async (): Promise<void> => {
 
         payload = await updatePagePayload({
           page_id: page.id,
-          state_id: relation.id,
+          state_id: relation?.id,
         });
       }
 
