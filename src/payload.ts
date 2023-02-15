@@ -166,11 +166,9 @@ export const getPullRequestPayload = () => {
  * @exports
  */
 export const getPullRequestStatePayload = () => {
-  const { pull_request, inputs } = getInputs();
-  const stateColumnName =
-    inputs.notion_properties.pull_request?.relation?.state;
+  const { pull_request } = getInputs();
 
-  if (!env.DATABASE_PR_STATE_ID && !stateColumnName && !pull_request?.state) {
+  if (!env.DATABASE_PR_STATE_ID && !pull_request?.state) {
     return;
   }
 
@@ -180,7 +178,7 @@ export const getPullRequestStatePayload = () => {
     filter: {
       and: [
         {
-          property: stateColumnName,
+          property: 'Name',
           title: {
             equals: pull_request?.state,
           },
