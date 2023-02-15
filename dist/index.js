@@ -28153,7 +28153,7 @@ const run = async () => {
                 }
                 payload = await (0, payload_1.updatePagePayload)({
                     page_id: page.id,
-                    state_id: relation.id,
+                    state_id: relation?.id,
                 });
             }
             if (prProperty.type === SupportedType.url) {

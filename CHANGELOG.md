@@ -1,3 +1,10 @@
+## [1.0.14](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.13...v1.0.14) (2023-02-15)
+
+
+### Bug Fixes
+
+* relation to be optional ([6b0848f](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/6b0848f9ff9aff034266b994ba01361cfb626012))
+
 ## [1.0.13](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.12...v1.0.13) (2023-02-15)
 
 
