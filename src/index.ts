@@ -10,7 +10,7 @@ import {
   getPullRequestPage,
   updatePullRequestPage,
 } from './notion';
-import { updateIssuePagePayload } from './payload';
+import { updatePagePayload } from './payload';
 import { getUrlsFromString, getPageIds, clean } from './utils';
 
 const SupportedType = {
@@ -27,33 +27,33 @@ type PropertyResponse = {
   id: string;
 };
 
-const inputs = getInputs();
+const { inputs, pull_request } = getInputs();
 
 const run = async (): Promise<void> => {
-  if (!inputs.notion.status) {
-    return;
-  }
-  const bodyPages = getUrlsFromString({
-    body: inputs.pull_request?.body,
+  const bodyNotionLinks = getUrlsFromString({
+    body: pull_request.body,
     left_delimiter: inputs.left_delimiter,
     right_delimiter: inputs.right_delimiter,
   });
-  const pageIds = getPageIds(bodyPages);
+
+  const pageIds = getPageIds(bodyNotionLinks);
+
   for (const pageId of pageIds) {
     const page = await getPage(pageId);
-    let payload = updateIssuePagePayload({ page_id: pageId });
+    let payload = updatePagePayload({ page_id: pageId });
     const currentPageStatus = page.properties[
-      inputs.notion?.status_property
+      inputs.notion_properties.status.name
     ] as StatusPropertyItemObjectResponse;
+    const notionPullRequest = inputs.notion_properties.pull_request;
 
-    if (inputs.notion?.pr_property_name) {
+    if (notionPullRequest?.name) {
       if (!env.DATABASE_PR_ID) {
-        core.setFailed('{{ vars.DATABASE_RELATION_ID }} variable not set.');
+        core.setFailed('{{ vars.DATABASE_PR_ID }} variable not set.');
         return;
       }
 
       const prProperty = page.properties[
-        inputs.notion.pr_property_name
+        notionPullRequest.name
       ] as PropertyResponse;
 
       if (prProperty.type === SupportedType.relation) {
@@ -65,14 +65,14 @@ const run = async (): Promise<void> => {
           relation = await updatePullRequestPage(currentPullRequest.id);
         }
 
-        payload = await updateIssuePagePayload({
+        payload = await updatePagePayload({
           page_id: page.id,
-          state_id: relation?.id,
+          state_id: relation.id,
         });
       }
 
       if (prProperty.type === SupportedType.url) {
-        payload = await updateIssuePagePayload({
+        payload = await updatePagePayload({
           page_id: page.id,
           url: true,
         });
@@ -82,9 +82,9 @@ const run = async (): Promise<void> => {
     const cleanedPayload = clean(payload);
 
     if (
-      inputs.notion.status !== currentPageStatus.status?.name ||
-      (inputs.notion?.pr_property_name &&
-        cleanedPayload.properties[inputs.notion?.pr_property_name])
+      inputs.related_status !== currentPageStatus.status?.name ||
+      (notionPullRequest?.name &&
+        cleanedPayload.properties[notionPullRequest.name])
     ) {
       await updatePage(cleanedPayload);
     }

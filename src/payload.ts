@@ -6,8 +6,7 @@ import {
 
 import env from './config';
 import getInputs from './github';
-
-const inputs = getInputs();
+import { clean } from './utils';
 
 /**
  * Payload for updating page from the Pull Request database.
@@ -17,8 +16,13 @@ const inputs = getInputs();
  * @returns {UpdatePageParameters}
  * @exports
  */
-export const updatePRPagePayload = (pageId: string, stateId: string) =>
-  ({
+export const updatePullRequestPayload = (pageId: string, stateId: string) => {
+  const { inputs } = getInputs();
+  const notionPullRequest = inputs.notion_properties.pull_request;
+
+  if (!notionPullRequest?.name) return;
+
+  return clean({
     page_id: pageId,
     icon: {
       external: {
@@ -26,13 +30,12 @@ export const updatePRPagePayload = (pageId: string, stateId: string) =>
       },
     },
     properties: {
-      ...(pageId && {
-        State: {
-          relation: [{ id: stateId }],
-        },
-      }),
+      [notionPullRequest.name]: {
+        relation: [{ id: stateId }],
+      },
     },
   } as UpdatePageParameters);
+};
 
 /**
  * Payload for updating an existing issue/page
@@ -42,7 +45,7 @@ export const updatePRPagePayload = (pageId: string, stateId: string) =>
  * @returns {{ page_id: string; properties: { [x: string]: { status: { name: string | undefined; }; } | { url?: string | undefined; relation?: { ...; }[] | undefined; status?: undefined; }; }; }}
  * @exports
  */
-export const updateIssuePagePayload = ({
+export const updatePagePayload = ({
   page_id,
   state_id,
   url,
@@ -50,28 +53,35 @@ export const updateIssuePagePayload = ({
   page_id: string;
   state_id?: string;
   url?: boolean;
-}) => ({
-  page_id,
-  properties: {
-    ...(inputs.notion?.status_property && {
-      [inputs.notion.status_property]: {
+}) => {
+  const { inputs, pull_request } = getInputs();
+  const notionPullRequest = inputs.notion_properties.pull_request;
+
+  if (!inputs.related_status && !state_id && !url) return;
+
+  const payload = clean({
+    page_id,
+    properties: {
+      [inputs.notion_properties.status.name]: {
         status: {
-          name: inputs.notion?.status,
+          name: inputs.related_status,
         },
       },
-    }),
-    ...(inputs.notion?.pr_property_name && {
-      [inputs.notion.pr_property_name]: {
-        ...(state_id && {
-          relation: [{ id: state_id }],
-        }),
-        ...(url && {
-          url: inputs.pull_request?.href,
-        }),
-      },
-    }),
-  },
-});
+      ...(notionPullRequest && {
+        [notionPullRequest.name]: {
+          ...(state_id && {
+            relation: [{ id: state_id }],
+          }),
+          ...(url && {
+            url: pull_request.href,
+          }),
+        },
+      }),
+    },
+  });
+
+  return payload;
+};
 
 /**
  * Payload for creating a new page in Pull Request database.
@@ -80,38 +90,44 @@ export const updateIssuePagePayload = ({
  * @returns {CreatePageBodyParameters}
  * @exports
  */
-export const addPullRequestPayload = (stateId: string) =>
-  ({
+export const addPullRequestPayload = (stateId: string) => {
+  const { inputs, pull_request } = getInputs();
+  const notionPullRequest = inputs.notion_properties.pull_request?.relation;
+
+  if (!env.DATABASE_PR_ID || !notionPullRequest) {
+    return;
+  }
+
+  return clean({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    parent: { database_id: env.DATABASE_PR_ID! },
+    parent: { database_id: env.DATABASE_PR_ID },
     icon: {
       external: {
         url: 'https://cdn.simpleicons.org/github/8B949E',
       },
     },
     properties: {
-      Title: {
+      [notionPullRequest.title]: {
         title: [
           {
             text: {
-              content: inputs.pull_request?.title,
+              content: pull_request.title,
             },
           },
         ],
       },
-      Number: {
-        number: inputs.pull_request?.number,
+      [notionPullRequest.id]: {
+        number: pull_request.number,
       },
-      Link: {
-        url: inputs.pull_request?.href,
+      [notionPullRequest.link]: {
+        url: pull_request.href,
       },
-      ...(stateId && {
-        State: {
-          relation: [{ id: stateId }],
-        },
-      }),
+      [notionPullRequest.state]: {
+        relation: [{ id: stateId }],
+      },
     },
   } as CreatePageParameters);
+};
 
 /**
  * Payload to return pages from Pull Request database
@@ -119,21 +135,29 @@ export const addPullRequestPayload = (stateId: string) =>
  * @returns {QueryDatabaseParameters}
  * @exports
  */
-export const getPullRequestPayload = () =>
-  ({
+export const getPullRequestPayload = () => {
+  const { inputs, pull_request } = getInputs();
+  const stateColumnId = inputs.notion_properties.pull_request?.relation?.id;
+
+  if (!env.DATABASE_PR_ID || !stateColumnId || !pull_request.number) {
+    return;
+  }
+
+  return clean({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    database_id: env.DATABASE_PR_ID!,
+    database_id: env.DATABASE_PR_ID,
     filter: {
       and: [
         {
-          property: inputs.notion?.pr_id_column_name,
+          property: stateColumnId,
           number: {
-            equals: inputs.pull_request?.number,
+            equals: pull_request.number,
           },
         },
       ],
     },
   } as QueryDatabaseParameters);
+};
 
 /**
  * Payload to return pages from Pull Request States database
@@ -141,18 +165,27 @@ export const getPullRequestPayload = () =>
  * @returns {QueryDatabaseParameters}
  * @exports
  */
-export const getPullRequestStatePayload = () =>
-  ({
+export const getPullRequestStatePayload = () => {
+  const { pull_request, inputs } = getInputs();
+  const stateColumnName =
+    inputs.notion_properties.pull_request?.relation?.state;
+
+  if (!env.DATABASE_PR_STATE_ID && !stateColumnName && !pull_request?.state) {
+    return;
+  }
+
+  return clean({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    database_id: env.DATABASE_PR_STATE_ID!,
+    database_id: env.DATABASE_PR_STATE_ID,
     filter: {
       and: [
         {
-          property: inputs.notion?.pr_state_column_name,
+          property: stateColumnName,
           title: {
-            equals: inputs.pull_request?.state,
+            equals: pull_request?.state,
           },
         },
       ],
     },
   } as QueryDatabaseParameters);
+};

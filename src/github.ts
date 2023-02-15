@@ -1,56 +1,84 @@
-import { getInput } from '@actions/core';
+import { getInput, setFailed } from '@actions/core';
 import { context } from '@actions/github';
 
-// type GithubContext = typeof context;
+import { assertNoPropsUndefined, parseJson } from './utils';
 
 interface Inputs {
   readonly right_delimiter: string;
   readonly left_delimiter: string;
-  readonly notion: NotionProperties;
-  readonly pull_request: PullRequest;
+  readonly notion_properties: NotionProperties;
+  readonly related_status?: string;
 }
 
-interface PullRequest {
+export interface GithubPullRequest {
   readonly body: string;
   readonly href?: string;
   readonly state?: string;
   readonly number?: number;
   readonly title?: string;
 }
-interface NotionProperties {
-  readonly status_property: string;
-  readonly pr_property_name?: string;
-  readonly pr_id_column_name?: string;
-  readonly pr_state_column_name?: string;
-  readonly status?: string;
+
+interface NotionPullRequestProperty {
+  readonly name: string;
+  readonly relation?: NotionRelationProperty;
 }
+
+type NotionRelationProperty = {
+  readonly id: string;
+  readonly link: string;
+  readonly state: string;
+  readonly title: string;
+};
+
+type PropertyName = {
+  name: string;
+};
+
+type NotionProperties = {
+  pull_request?: NotionPullRequestProperty;
+  status: PropertyName;
+};
+
+export type WorkflowInput = {
+  inputs: Inputs;
+  pull_request: GithubPullRequest;
+};
 
 /**
  * Create an object with all the values set on github workflow
  *
- * @returns {Inputs}
+ * @returns {WorkflowInput}
  */
-const getInputs = (): Inputs => {
+const getInputs = (): WorkflowInput => {
   const pullRequest = context.payload.pull_request;
   const state = pullRequest?.merged
     ? 'merged'
     : pullRequest?.draft
     ? 'draft'
     : context.payload.action;
+  const notionProperties: NotionProperties = parseJson(
+    getInput('notion_properties', { required: true })
+  );
+
+  if (notionProperties.pull_request) {
+    for (const prop of Object.values(notionProperties.pull_request)) {
+      assertNoPropsUndefined(prop);
+    }
+
+    if (
+      notionProperties.pull_request.relation &&
+      !Object.values(notionProperties.pull_request.relation).every((v) => v)
+    ) {
+      setFailed(`All properties of relation should be defined.`);
+    }
+  }
+
   return {
-    right_delimiter: getInput('right_delimiter', { required: true }),
-    left_delimiter: getInput('left_delimiter', { required: true }),
-    notion: {
-      status_property: getInput('notion_status_property', {
-        required: true,
-      }),
-      pr_property_name: getInput('notion_pr_property_name', {
-        required: false,
-      }),
-      pr_id_column_name: getInput('notion_pr_id_column_name', {
-        required: false,
-      }),
-      status: state && getInput(state, { required: false }),
+    inputs: {
+      right_delimiter: getInput('right_delimiter', { required: true }),
+      left_delimiter: getInput('left_delimiter', { required: true }),
+      related_status: state && getInput(state, { required: false }),
+      notion_properties: notionProperties,
     },
     pull_request: {
       body: pullRequest?.body ?? '',

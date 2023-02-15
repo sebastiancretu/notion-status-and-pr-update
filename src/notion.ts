@@ -8,7 +8,7 @@ import env from './config';
 import {
   getPullRequestPayload,
   addPullRequestPayload,
-  updatePRPagePayload,
+  updatePullRequestPayload,
   getPullRequestStatePayload,
 } from './payload';
 
@@ -52,7 +52,7 @@ export const updatePullRequestPage = async (pageId: string) => {
   if (!stateId) {
     return;
   }
-  const payload = updatePRPagePayload(pageId, stateId);
+  const payload = updatePullRequestPayload(pageId, stateId);
 
   return (await notion.pages.update(payload)) as UpdatePageResponse;
 };

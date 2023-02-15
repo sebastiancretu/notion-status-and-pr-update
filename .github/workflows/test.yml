@@ -19,10 +19,8 @@ jobs:
         with:
           left_delimiter: ']('
           right_delimiter: ')'
-          notion_status_property: 'Notion Status'
-          notion_pr_property_name: 'Pull Request'
-          notion_pr_id_column_name: 'Number'
-          opened: 'In review'
-          ready_for_review: 'In review'
+          notion_properties: '{ "status": { "name": "Notion Status" }, "pull_request": { "name": "Pull Request", "relation": { "id": "Number", "link": "Link", "state": "State", "title": "Title" } }, "url": { "name": "PR", "href": "https://google.com" } }'
+          opened: 'Code Review'
+          ready_for_review: 'Code Review'
           closed: 'Completed'
           merged: 'Completed'
