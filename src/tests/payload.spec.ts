@@ -1,3 +1,4 @@
+import env from '../config';
 import getInputs from '../github';
 import {
   addPullRequestPayload,
@@ -14,6 +15,8 @@ jest.mock('../github');
 describe('payload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    env.DATABASE_PR_ID = 'test';
+    env.DATABASE_PR_STATE_ID = 'test';
   });
   describe('updatePagePayload', () => {
     it('should be undefined', () => {
