@@ -1,5 +1,5 @@
+import { setFailed } from '@actions/core';
 import 'dotenv/config';
-import core from '@actions/core';
 
 interface ENV {
   NOTION_TOKEN: string | undefined;
@@ -25,7 +25,7 @@ const getConfig = (): ENV => {
 const getSanitzedConfig = (config: ENV): Config => {
   for (const [key, value] of Object.entries(config)) {
     if (value === undefined) {
-      core.setFailed(`Environment variable ${key} NOT set!`);
+      setFailed(`Environment variable ${key} NOT set!`);
     }
   }
   return config as Config;

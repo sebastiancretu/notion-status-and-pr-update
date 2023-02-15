@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import { setFailed } from '@actions/core';
 import { StatusPropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 import env from './config';
@@ -48,7 +48,7 @@ const run = async (): Promise<void> => {
 
     if (notionPullRequest?.name) {
       if (!env.DATABASE_PR_ID) {
-        core.setFailed('{{ vars.DATABASE_PR_ID }} variable not set.');
+        setFailed('{{ vars.DATABASE_PR_ID }} variable not set.');
         return;
       }
 
