@@ -28074,6 +28074,7 @@ const getInputs = () => {
             ? 'draft'
             : github_1.context.payload.action;
     const notionProperties = (0, utils_1.parseJson)((0, core_1.getInput)('notion_properties', { required: true }));
+    const relatedStatus = state && (0, core_1.getInput)(state, { required: false });
     if (notionProperties.pull_request) {
         for (const prop of Object.values(notionProperties.pull_request)) {
             (0, utils_1.assertNoPropsUndefined)(prop);
@@ -28087,7 +28088,7 @@ const getInputs = () => {
         inputs: {
             right_delimiter: (0, core_1.getInput)('right_delimiter', { required: true }),
             left_delimiter: (0, core_1.getInput)('left_delimiter', { required: true }),
-            related_status: state && (0, core_1.getInput)(state, { required: false }),
+            related_status: relatedStatus,
             notion_properties: notionProperties,
         },
         pull_request: {
@@ -28125,6 +28126,9 @@ const SupportedType = {
 };
 const { inputs, pull_request } = (0, github_1.default)();
 const run = async () => {
+    console.log(inputs.related_status);
+    if (inputs.notion_properties.pull_request?.relation && !inputs.related_status)
+        return;
     const bodyNotionLinks = (0, utils_1.getUrlsFromString)({
         body: pull_request.body,
         left_delimiter: inputs.left_delimiter,
@@ -28145,6 +28149,7 @@ const run = async () => {
             if (prProperty.type === SupportedType.relation) {
                 let relation;
                 const currentPullRequest = await (0, notion_1.getPullRequestPage)();
+                console.log(currentPullRequest, relation);
                 if (!currentPullRequest) {
                     relation = await (0, notion_1.addPullRequestPage)();
                 }
@@ -28434,7 +28439,7 @@ exports.getPullRequestPayload = getPullRequestPayload;
  */
 const getPullRequestStatePayload = () => {
     const { pull_request } = (0, github_1.default)();
-    if (!config_1.default.DATABASE_PR_STATE_ID && !pull_request?.state) {
+    if (!config_1.default.DATABASE_PR_STATE_ID || !pull_request?.state) {
         return;
     }
     return (0, utils_1.clean)({
