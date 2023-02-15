@@ -30,6 +30,10 @@ type PropertyResponse = {
 const { inputs, pull_request } = getInputs();
 
 const run = async (): Promise<void> => {
+  console.log(inputs.related_status);
+  if (inputs.notion_properties.pull_request?.relation && !inputs.related_status)
+    return;
+
   const bodyNotionLinks = getUrlsFromString({
     body: pull_request.body,
     left_delimiter: inputs.left_delimiter,
@@ -59,12 +63,13 @@ const run = async (): Promise<void> => {
       if (prProperty.type === SupportedType.relation) {
         let relation;
         const currentPullRequest = await getPullRequestPage();
+        console.log(currentPullRequest, relation);
+
         if (!currentPullRequest) {
           relation = await addPullRequestPage();
         } else if (currentPullRequest) {
           relation = await updatePullRequestPage(currentPullRequest.id);
         }
-
         payload = await updatePagePayload({
           page_id: page.id,
           state_id: relation?.id,

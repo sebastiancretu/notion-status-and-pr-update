@@ -51,6 +51,7 @@ export type WorkflowInput = {
  */
 const getInputs = (): WorkflowInput => {
   const pullRequest = context.payload.pull_request;
+
   const state = pullRequest?.merged
     ? 'merged'
     : pullRequest?.draft
@@ -59,6 +60,7 @@ const getInputs = (): WorkflowInput => {
   const notionProperties: NotionProperties = parseJson(
     getInput('notion_properties', { required: true })
   );
+  const relatedStatus = state && getInput(state, { required: false });
 
   if (notionProperties.pull_request) {
     for (const prop of Object.values(notionProperties.pull_request)) {
@@ -77,7 +79,7 @@ const getInputs = (): WorkflowInput => {
     inputs: {
       right_delimiter: getInput('right_delimiter', { required: true }),
       left_delimiter: getInput('left_delimiter', { required: true }),
-      related_status: state && getInput(state, { required: false }),
+      related_status: relatedStatus,
       notion_properties: notionProperties,
     },
     pull_request: {

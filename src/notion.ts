@@ -81,7 +81,6 @@ export const addPullRequestPage = async () => {
  */
 export const getPullRequestPage = async () => {
   const payload = getPullRequestPayload();
-
   return await notion.databases
     .query(payload)
     .then((r) => r.results.pop() as PageObjectResponse);

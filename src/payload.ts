@@ -168,10 +168,9 @@ export const getPullRequestPayload = () => {
 export const getPullRequestStatePayload = () => {
   const { pull_request } = getInputs();
 
-  if (!env.DATABASE_PR_STATE_ID && !pull_request?.state) {
+  if (!env.DATABASE_PR_STATE_ID || !pull_request?.state) {
     return;
   }
-
   return clean({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     database_id: env.DATABASE_PR_STATE_ID,
