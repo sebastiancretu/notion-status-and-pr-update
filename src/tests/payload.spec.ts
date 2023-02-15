@@ -152,7 +152,7 @@ describe('payload', () => {
       mockedInputs.mockImplementationOnce(() => createMockInputs());
       const result = addPullRequestPayload('121');
       expect(result).toEqual({
-        parent: { database_id: '6b02ce4aaed74a56bb1292779f42ef8f' },
+        parent: { database_id: 'test' },
         icon: {
           external: { url: 'https://cdn.simpleicons.org/github/8B949E' },
         },
@@ -191,7 +191,7 @@ describe('payload', () => {
       mockedInputs.mockImplementationOnce(() => createMockInputs());
       const result = getPullRequestPayload();
       expect(result).toEqual({
-        database_id: '6b02ce4aaed74a56bb1292779f42ef8f',
+        database_id: 'test',
         filter: { and: [{ property: 'Number', number: { equals: 1 } }] },
       });
     });
