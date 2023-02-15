@@ -1,3 +1,10 @@
+## [1.0.13](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.12...v1.0.13) (2023-02-15)
+
+
+### Bug Fixes
+
+* fixed state pr column name ([1139057](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/11390576558b2f54ee3ac7fd55f87a80deb6afee))
+
 ## [1.0.12](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.11...v1.0.12) (2023-02-15)
 
 

@@ -28433,9 +28433,8 @@ exports.getPullRequestPayload = getPullRequestPayload;
  * @exports
  */
 const getPullRequestStatePayload = () => {
-    const { pull_request, inputs } = (0, github_1.default)();
-    const stateColumnName = inputs.notion_properties.pull_request?.relation?.state;
-    if (!config_1.default.DATABASE_PR_STATE_ID && !stateColumnName && !pull_request?.state) {
+    const { pull_request } = (0, github_1.default)();
+    if (!config_1.default.DATABASE_PR_STATE_ID && !pull_request?.state) {
         return;
     }
     return (0, utils_1.clean)({
@@ -28444,7 +28443,7 @@ const getPullRequestStatePayload = () => {
         filter: {
             and: [
                 {
-                    property: stateColumnName,
+                    property: 'Name',
                     title: {
                         equals: pull_request?.state,
                     },
