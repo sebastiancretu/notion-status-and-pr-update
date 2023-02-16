@@ -65,6 +65,7 @@ export const updatePullRequestPage = async (pageId: string) => {
  */
 export const addPullRequestPage = async () => {
   const stateId = await getPullRequestState();
+
   if (!stateId) {
     return;
   }

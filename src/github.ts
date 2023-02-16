@@ -51,7 +51,6 @@ export type WorkflowInput = {
  */
 const getInputs = (): WorkflowInput => {
   const pullRequest = context.payload.pull_request;
-
   const state = pullRequest?.merged
     ? 'merged'
     : pullRequest?.draft
