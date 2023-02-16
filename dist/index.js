@@ -28126,8 +28126,7 @@ const SupportedType = {
 };
 const { inputs, pull_request } = (0, github_1.default)();
 const run = async () => {
-    console.log(inputs.related_status);
-    if (inputs.notion_properties.pull_request?.relation && !inputs.related_status)
+    if (!inputs.related_status)
         return;
     const bodyNotionLinks = (0, utils_1.getUrlsFromString)({
         body: pull_request.body,
@@ -28149,7 +28148,6 @@ const run = async () => {
             if (prProperty.type === SupportedType.relation) {
                 let relation;
                 const currentPullRequest = await (0, notion_1.getPullRequestPage)();
-                console.log(currentPullRequest, relation);
                 if (!currentPullRequest) {
                     relation = await (0, notion_1.addPullRequestPage)();
                 }

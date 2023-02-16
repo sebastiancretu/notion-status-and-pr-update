@@ -1,3 +1,10 @@
+## [1.0.16](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.15...v1.0.16) (2023-02-16)
+
+
+### Bug Fixes
+
+* added more conditions ([5126379](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/5126379f9a056dce5f9a8901788a8fa565033dd1))
+
 ## [1.0.15](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.14...v1.0.15) (2023-02-15)
 
 
