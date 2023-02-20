@@ -28058,49 +28058,43 @@ exports["default"] = env;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getPullRequest = exports.getInputs = void 0;
 const core_1 = __nccwpck_require__(2186);
 const github_1 = __nccwpck_require__(5438);
 const utils_1 = __nccwpck_require__(1314);
-/**
- * Create an object with all the values set on github workflow
- *
- * @returns {WorkflowInput}
- */
-const getInputs = () => {
+const getPullRequest = () => {
     const pullRequest = github_1.context.payload.pull_request;
     const state = pullRequest?.merged
         ? 'merged'
         : pullRequest?.draft
             ? 'draft'
             : github_1.context.payload.action;
-    const notionProperties = (0, utils_1.parseJson)((0, core_1.getInput)('notion_properties', { required: true }));
-    const relatedStatus = state && (0, core_1.getInput)(state, { required: false });
-    if (notionProperties.pull_request) {
-        for (const prop of Object.values(notionProperties.pull_request)) {
-            (0, utils_1.assertNoPropsUndefined)(prop);
-        }
-        if (notionProperties.pull_request.relation &&
-            !Object.values(notionProperties.pull_request.relation).every((v) => v)) {
-            (0, core_1.setFailed)(`All properties of relation should be defined.`);
-        }
-    }
     return {
-        inputs: {
-            right_delimiter: (0, core_1.getInput)('right_delimiter', { required: true }),
-            left_delimiter: (0, core_1.getInput)('left_delimiter', { required: true }),
-            related_status: relatedStatus,
-            notion_properties: notionProperties,
-        },
-        pull_request: {
-            body: pullRequest?.body ?? '',
-            href: pullRequest?.html_url,
-            number: Number(pullRequest?.number),
-            state,
-            title: pullRequest?.title,
-        },
+        body: pullRequest?.body ?? '',
+        href: pullRequest?.html_url,
+        number: Number(pullRequest?.number),
+        state,
+        title: pullRequest?.title,
     };
 };
-exports["default"] = getInputs;
+exports.getPullRequest = getPullRequest;
+/**
+ * Create an object with all the values set on github workflow
+ *
+ * @returns {WorkflowInput}
+ */
+const getInputs = () => {
+    const notionProperties = (0, utils_1.parseJson)((0, core_1.getInput)('notion_properties', { required: true }));
+    const pullRequest = getPullRequest();
+    const pageStatus = pullRequest?.state && (0, core_1.getInput)(pullRequest.state, { required: false });
+    return {
+        right_delimiter: (0, core_1.getInput)('right_delimiter', { required: true }),
+        left_delimiter: (0, core_1.getInput)('left_delimiter', { required: true }),
+        page_status: pageStatus,
+        notion_properties: notionProperties,
+    };
+};
+exports.getInputs = getInputs;
 
 
 /***/ }),
@@ -28116,7 +28110,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __nccwpck_require__(2186);
 const config_1 = __importDefault(__nccwpck_require__(6373));
-const github_1 = __importDefault(__nccwpck_require__(978));
+const github_1 = __nccwpck_require__(978);
 const notion_1 = __nccwpck_require__(7967);
 const payload_1 = __nccwpck_require__(5559);
 const utils_1 = __nccwpck_require__(1314);
@@ -28124,21 +28118,22 @@ const SupportedType = {
     url: 'url',
     relation: 'relation',
 };
-const { inputs, pull_request } = (0, github_1.default)();
+const { right_delimiter, left_delimiter, page_status, notion_properties } = (0, github_1.getInputs)();
+const pull_request = (0, github_1.getPullRequest)();
 const run = async () => {
-    if (!inputs.related_status)
+    if (!page_status)
         return;
     const bodyNotionLinks = (0, utils_1.getUrlsFromString)({
         body: pull_request.body,
-        left_delimiter: inputs.left_delimiter,
-        right_delimiter: inputs.right_delimiter,
+        left_delimiter,
+        right_delimiter,
     });
     const pageIds = (0, utils_1.getPageIds)(bodyNotionLinks);
     for (const pageId of pageIds) {
         const page = await (0, notion_1.getPage)(pageId);
         let payload = (0, payload_1.updatePagePayload)({ page_id: pageId });
-        const currentPageStatus = page.properties[inputs.notion_properties.status.name];
-        const notionPullRequest = inputs.notion_properties.pull_request;
+        const currentPageStatus = page.properties[notion_properties.status.name];
+        const notionPullRequest = notion_properties.pull_request;
         if (notionPullRequest?.name) {
             if (!config_1.default.DATABASE_PR_ID) {
                 (0, core_1.setFailed)('{{ vars.DATABASE_PR_ID }} variable not set.');
@@ -28167,7 +28162,7 @@ const run = async () => {
             }
         }
         const cleanedPayload = (0, utils_1.clean)(payload);
-        if (inputs.related_status !== currentPageStatus.status?.name ||
+        if (page_status !== currentPageStatus.status?.name ||
             (notionPullRequest?.name &&
                 cleanedPayload.properties[notionPullRequest.name])) {
             await (0, notion_1.updatePage)(cleanedPayload);
@@ -28291,7 +28286,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPullRequestStatePayload = exports.getPullRequestPayload = exports.addPullRequestPayload = exports.updatePagePayload = exports.updatePullRequestPayload = void 0;
 const config_1 = __importDefault(__nccwpck_require__(6373));
-const github_1 = __importDefault(__nccwpck_require__(978));
+const github_1 = __nccwpck_require__(978);
 const utils_1 = __nccwpck_require__(1314);
 /**
  * Payload for updating page from the Pull Request database.
@@ -28302,9 +28297,8 @@ const utils_1 = __nccwpck_require__(1314);
  * @exports
  */
 const updatePullRequestPayload = (pageId, stateId) => {
-    const { inputs } = (0, github_1.default)();
-    const notionPullRequest = inputs.notion_properties.pull_request;
-    if (!notionPullRequest?.name)
+    const { notion_properties } = (0, github_1.getInputs)();
+    if (!notion_properties.pull_request?.relation?.state)
         return;
     return (0, utils_1.clean)({
         page_id: pageId,
@@ -28314,7 +28308,7 @@ const updatePullRequestPayload = (pageId, stateId) => {
             },
         },
         properties: {
-            [notionPullRequest.name]: {
+            [notion_properties.pull_request.relation.state]: {
                 relation: [{ id: stateId }],
             },
         },
@@ -28330,25 +28324,25 @@ exports.updatePullRequestPayload = updatePullRequestPayload;
  * @exports
  */
 const updatePagePayload = ({ page_id, state_id, url, }) => {
-    const { inputs, pull_request } = (0, github_1.default)();
-    const notionPullRequest = inputs.notion_properties.pull_request;
-    if (!inputs.related_status && !state_id && !url)
+    const { page_status, notion_properties } = (0, github_1.getInputs)();
+    const { href } = (0, github_1.getPullRequest)();
+    if (!page_status && !state_id && !url)
         return;
     const payload = (0, utils_1.clean)({
         page_id,
         properties: {
-            [inputs.notion_properties.status.name]: {
+            [notion_properties.status.name]: {
                 status: {
-                    name: inputs.related_status,
+                    name: page_status,
                 },
             },
-            ...(notionPullRequest && {
-                [notionPullRequest.name]: {
+            ...(notion_properties.pull_request && {
+                [notion_properties.pull_request.name]: {
                     ...(state_id && {
                         relation: [{ id: state_id }],
                     }),
                     ...(url && {
-                        url: pull_request.href,
+                        url: href,
                     }),
                 },
             }),
@@ -28365,9 +28359,10 @@ exports.updatePagePayload = updatePagePayload;
  * @exports
  */
 const addPullRequestPayload = (stateId) => {
-    const { inputs, pull_request } = (0, github_1.default)();
-    const notionPullRequest = inputs.notion_properties.pull_request?.relation;
-    if (!config_1.default.DATABASE_PR_ID || !notionPullRequest) {
+    const { notion_properties } = (0, github_1.getInputs)();
+    const { title, number, href } = (0, github_1.getPullRequest)();
+    const pullRequestRelationProperty = notion_properties.pull_request?.relation;
+    if (!config_1.default.DATABASE_PR_ID || !pullRequestRelationProperty) {
         return;
     }
     return (0, utils_1.clean)({
@@ -28379,22 +28374,22 @@ const addPullRequestPayload = (stateId) => {
             },
         },
         properties: {
-            [notionPullRequest.title]: {
+            [pullRequestRelationProperty.title]: {
                 title: [
                     {
                         text: {
-                            content: pull_request.title,
+                            content: title,
                         },
                     },
                 ],
             },
-            [notionPullRequest.id]: {
-                number: pull_request.number,
+            [pullRequestRelationProperty.id]: {
+                number: number,
             },
-            [notionPullRequest.link]: {
-                url: pull_request.href,
+            [pullRequestRelationProperty.link]: {
+                url: href,
             },
-            [notionPullRequest.state]: {
+            [pullRequestRelationProperty.state]: {
                 relation: [{ id: stateId }],
             },
         },
@@ -28408,20 +28403,20 @@ exports.addPullRequestPayload = addPullRequestPayload;
  * @exports
  */
 const getPullRequestPayload = () => {
-    const { inputs, pull_request } = (0, github_1.default)();
-    const stateColumnId = inputs.notion_properties.pull_request?.relation?.id;
-    if (!config_1.default.DATABASE_PR_ID || !stateColumnId || !pull_request.number) {
+    const { notion_properties } = (0, github_1.getInputs)();
+    const { number } = (0, github_1.getPullRequest)();
+    const stateColumnId = notion_properties.pull_request?.relation?.id;
+    if (!config_1.default.DATABASE_PR_ID || !stateColumnId || !number) {
         return;
     }
     return (0, utils_1.clean)({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         database_id: config_1.default.DATABASE_PR_ID,
         filter: {
             and: [
                 {
                     property: stateColumnId,
                     number: {
-                        equals: pull_request.number,
+                        equals: number,
                     },
                 },
             ],
@@ -28436,19 +28431,20 @@ exports.getPullRequestPayload = getPullRequestPayload;
  * @exports
  */
 const getPullRequestStatePayload = () => {
-    const { pull_request } = (0, github_1.default)();
-    if (!config_1.default.DATABASE_PR_STATE_ID || !pull_request?.state) {
+    const { notion_properties } = (0, github_1.getInputs)();
+    const { state } = (0, github_1.getPullRequest)();
+    const eventTypeColumn = notion_properties.pull_request_state?.event_type;
+    if (!config_1.default.DATABASE_PR_STATE_ID || !state || !eventTypeColumn) {
         return;
     }
     return (0, utils_1.clean)({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         database_id: config_1.default.DATABASE_PR_STATE_ID,
         filter: {
             and: [
                 {
-                    property: 'Name',
+                    property: eventTypeColumn,
                     title: {
-                        equals: pull_request?.state,
+                        equals: state,
                     },
                 },
             ],
@@ -28466,11 +28462,11 @@ exports.getPullRequestStatePayload = getPullRequestStatePayload;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.assertNoPropsUndefined = exports.mockFunction = exports.clean = exports.parseJson = exports.getPageIds = exports.getUrlsFromString = void 0;
+exports.setInput = exports.assertNoPropsUndefined = exports.mockFunction = exports.clean = exports.parseJson = exports.getPageIds = exports.getUrlsFromString = void 0;
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const core_1 = __nccwpck_require__(2186);
-__nccwpck_require__(4227);
 const lodash_1 = __nccwpck_require__(250);
+__nccwpck_require__(4227);
 /**
  * Gets all URL's from a string between two preset delimiters
  *
@@ -28592,6 +28588,10 @@ function assertNoPropsUndefined(obj) {
     });
 }
 exports.assertNoPropsUndefined = assertNoPropsUndefined;
+function setInput(name, value) {
+    process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] = value;
+}
+exports.setInput = setInput;
 
 
 /***/ }),

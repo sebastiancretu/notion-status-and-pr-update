@@ -1,3 +1,10 @@
+## [1.0.17](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.16...v1.0.17) (2023-02-20)
+
+
+### Bug Fixes
+
+* added new state column ([5e5fdfb](https://github.com/sebastiancretu/notion-status-and-pr-update/commit/5e5fdfb37bb3b4eac180d57ada9cd9078045dcce))
+
 ## [1.0.16](https://github.com/sebastiancretu/notion-status-and-pr-update/compare/v1.0.15...v1.0.16) (2023-02-16)
 
 
