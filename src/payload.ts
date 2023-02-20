@@ -5,7 +5,7 @@ import {
 } from '@notionhq/client/build/src/api-endpoints';
 
 import env from './config';
-import getInputs from './github';
+import { getInputs, getPullRequest } from './github';
 import { clean } from './utils';
 
 /**
@@ -17,10 +17,9 @@ import { clean } from './utils';
  * @exports
  */
 export const updatePullRequestPayload = (pageId: string, stateId: string) => {
-  const { inputs } = getInputs();
-  const notionPullRequest = inputs.notion_properties.pull_request;
+  const { notion_properties } = getInputs();
 
-  if (!notionPullRequest?.name) return;
+  if (!notion_properties.pull_request?.relation?.state) return;
 
   return clean({
     page_id: pageId,
@@ -30,7 +29,7 @@ export const updatePullRequestPayload = (pageId: string, stateId: string) => {
       },
     },
     properties: {
-      [notionPullRequest.name]: {
+      [notion_properties.pull_request.relation.state]: {
         relation: [{ id: stateId }],
       },
     },
@@ -54,26 +53,26 @@ export const updatePagePayload = ({
   state_id?: string;
   url?: boolean;
 }) => {
-  const { inputs, pull_request } = getInputs();
-  const notionPullRequest = inputs.notion_properties.pull_request;
+  const { page_status, notion_properties } = getInputs();
+  const { href } = getPullRequest();
 
-  if (!inputs.related_status && !state_id && !url) return;
+  if (!page_status && !state_id && !url) return;
 
   const payload = clean({
     page_id,
     properties: {
-      [inputs.notion_properties.status.name]: {
+      [notion_properties.status.name]: {
         status: {
-          name: inputs.related_status,
+          name: page_status,
         },
       },
-      ...(notionPullRequest && {
-        [notionPullRequest.name]: {
+      ...(notion_properties.pull_request && {
+        [notion_properties.pull_request.name]: {
           ...(state_id && {
             relation: [{ id: state_id }],
           }),
           ...(url && {
-            url: pull_request.href,
+            url: href,
           }),
         },
       }),
@@ -91,10 +90,11 @@ export const updatePagePayload = ({
  * @exports
  */
 export const addPullRequestPayload = (stateId: string) => {
-  const { inputs, pull_request } = getInputs();
-  const notionPullRequest = inputs.notion_properties.pull_request?.relation;
+  const { notion_properties } = getInputs();
+  const { title, number, href } = getPullRequest();
+  const pullRequestRelationProperty = notion_properties.pull_request?.relation;
 
-  if (!env.DATABASE_PR_ID || !notionPullRequest) {
+  if (!env.DATABASE_PR_ID || !pullRequestRelationProperty) {
     return;
   }
 
@@ -107,22 +107,22 @@ export const addPullRequestPayload = (stateId: string) => {
       },
     },
     properties: {
-      [notionPullRequest.title]: {
+      [pullRequestRelationProperty.title]: {
         title: [
           {
             text: {
-              content: pull_request.title,
+              content: title,
             },
           },
         ],
       },
-      [notionPullRequest.id]: {
-        number: pull_request.number,
+      [pullRequestRelationProperty.id]: {
+        number: number,
       },
-      [notionPullRequest.link]: {
-        url: pull_request.href,
+      [pullRequestRelationProperty.link]: {
+        url: href,
       },
-      [notionPullRequest.state]: {
+      [pullRequestRelationProperty.state]: {
         relation: [{ id: stateId }],
       },
     },
@@ -136,22 +136,22 @@ export const addPullRequestPayload = (stateId: string) => {
  * @exports
  */
 export const getPullRequestPayload = () => {
-  const { inputs, pull_request } = getInputs();
-  const stateColumnId = inputs.notion_properties.pull_request?.relation?.id;
+  const { notion_properties } = getInputs();
+  const { number } = getPullRequest();
+  const stateColumnId = notion_properties.pull_request?.relation?.id;
 
-  if (!env.DATABASE_PR_ID || !stateColumnId || !pull_request.number) {
+  if (!env.DATABASE_PR_ID || !stateColumnId || !number) {
     return;
   }
 
   return clean({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     database_id: env.DATABASE_PR_ID,
     filter: {
       and: [
         {
           property: stateColumnId,
           number: {
-            equals: pull_request.number,
+            equals: number,
           },
         },
       ],
@@ -166,20 +166,21 @@ export const getPullRequestPayload = () => {
  * @exports
  */
 export const getPullRequestStatePayload = () => {
-  const { pull_request } = getInputs();
+  const { notion_properties } = getInputs();
+  const { state } = getPullRequest();
+  const eventTypeColumn = notion_properties.pull_request_state?.event_type;
 
-  if (!env.DATABASE_PR_STATE_ID || !pull_request?.state) {
+  if (!env.DATABASE_PR_STATE_ID || !state || !eventTypeColumn) {
     return;
   }
   return clean({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     database_id: env.DATABASE_PR_STATE_ID,
     filter: {
       and: [
         {
-          property: 'Name',
+          property: eventTypeColumn,
           title: {
-            equals: pull_request?.state,
+            equals: state,
           },
         },
       ],

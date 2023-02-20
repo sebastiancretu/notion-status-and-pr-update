@@ -19,7 +19,7 @@ jobs:
         with:
           left_delimiter: ']('
           right_delimiter: ')'
-          notion_properties: '{ "status": { "name": "Notion Status" }, "pull_request": { "name": "Pull Request", "relation": { "id": "Number", "link": "Link", "state": "State", "title": "Title" } }, "url": { "name": "PR", "href": "https://google.com" } }'
+          notion_properties: '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } }, "pull_request_state":{ "name":"Name", "event_type":"Event" } }'
           opened: 'Code Review'
           ready_for_review: 'Code Review'
           closed: 'Completed'

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { setFailed } from '@actions/core';
-import 'dotenv/config';
 import { transform, isPlainObject, isEmpty } from 'lodash';
+import 'dotenv/config';
 /**
  * Gets all URL's from a string between two preset delimiters
  *
@@ -170,4 +170,8 @@ export function assertNoPropsUndefined<T extends object>(
   Object.entries(obj).forEach(([k, v]) => {
     if (!v) setFailed(`Missing value for property ${k}`);
   });
+}
+
+export function setInput(name, value): void {
+  process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] = value;
 }

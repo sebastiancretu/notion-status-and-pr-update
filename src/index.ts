@@ -2,7 +2,7 @@ import { setFailed } from '@actions/core';
 import { StatusPropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 import env from './config';
-import getInputs from './github';
+import { getInputs, getPullRequest } from './github';
 import {
   getPage,
   addPullRequestPage,
@@ -27,25 +27,30 @@ type PropertyResponse = {
   id: string;
 };
 
-const { inputs, pull_request } = getInputs();
+const { right_delimiter, left_delimiter, page_status, notion_properties } =
+  getInputs();
+const pull_request = getPullRequest();
 
 const run = async (): Promise<void> => {
-  if (!inputs.related_status) return;
+  if (!page_status) return;
+
   const bodyNotionLinks = getUrlsFromString({
     body: pull_request.body,
-    left_delimiter: inputs.left_delimiter,
-    right_delimiter: inputs.right_delimiter,
+    left_delimiter,
+    right_delimiter,
   });
 
   const pageIds = getPageIds(bodyNotionLinks);
 
   for (const pageId of pageIds) {
     const page = await getPage(pageId);
+
     let payload = updatePagePayload({ page_id: pageId });
+
     const currentPageStatus = page.properties[
-      inputs.notion_properties.status.name
+      notion_properties.status.name
     ] as StatusPropertyItemObjectResponse;
-    const notionPullRequest = inputs.notion_properties.pull_request;
+    const notionPullRequest = notion_properties.pull_request;
 
     if (notionPullRequest?.name) {
       if (!env.DATABASE_PR_ID) {
@@ -60,7 +65,6 @@ const run = async (): Promise<void> => {
       if (prProperty.type === SupportedType.relation) {
         let relation;
         const currentPullRequest = await getPullRequestPage();
-
         if (!currentPullRequest) {
           relation = await addPullRequestPage();
         } else if (currentPullRequest) {
@@ -83,7 +87,7 @@ const run = async (): Promise<void> => {
     const cleanedPayload = clean(payload);
 
     if (
-      inputs.related_status !== currentPageStatus.status?.name ||
+      page_status !== currentPageStatus.status?.name ||
       (notionPullRequest?.name &&
         cleanedPayload.properties[notionPullRequest.name])
     ) {

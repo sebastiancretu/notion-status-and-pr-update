@@ -1,155 +1,185 @@
+import * as github from '@actions/github';
+
 import env from '../config';
-import getInputs from '../github';
 import {
   addPullRequestPayload,
   getPullRequestPayload,
+  getPullRequestStatePayload,
   updatePagePayload,
   updatePullRequestPayload,
 } from '../payload';
-import { mockFunction } from '../utils';
+import { setInput } from '../utils';
 
-import { createMockInputs } from './mocks/createMockInputs';
-
-jest.mock('../github');
+const originalContext = { ...github.context };
 
 describe('payload', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeAll(() => {
+    setInput('right_delimiter', ')');
+    setInput('left_delimiter', '](');
     env.DATABASE_PR_ID = 'test';
     env.DATABASE_PR_STATE_ID = 'test';
   });
+
+  beforeEach(() => {
+    // env.DATABASE_PR_ID = 'test';
+    // env.DATABASE_PR_STATE_ID = 'test';
+    // setInput('right_delimiter', ')');
+    // setInput('left_delimiter', '](');
+    // setInput(
+    //   'notion_properties',
+    //   '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } }, "pull_request_state":{ "name":"Name", "event_type":"Event" } }'
+    // );
+    // setInput('opened', 'Code Review');
+    // setInput('ready_for_review', 'Code Review');
+    // setInput('closed', 'Completed');
+    // setInput('merged', 'Completed');
+    // Object.defineProperty(github, 'context', {
+    //   value: {
+    //     payload: {
+    //       action: 'closed',
+    //       pull_request: {
+    //         merged: false,
+    //         draft: false,
+    //         body: 'description body',
+    //         html_url: 'https://github.com/actions/checkout/pull/1180',
+    //         number: 1180,
+    //         title: 'Add Ref and Commit outputs',
+    //       },
+    //     },
+    //   },
+    // });
+  });
+
+  afterEach(() => {
+    // Restore original @actions/github context
+    Object.defineProperty(github, 'context', {
+      value: originalContext,
+    });
+  });
+
   describe('updatePagePayload', () => {
-    it('should be undefined', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() =>
-        createMockInputs({
-          inputs: {
-            related_status: undefined,
-            right_delimiter: '](',
-            left_delimiter: ')',
-            notion_properties: {
-              status: {
-                name: 'Status',
-              },
+    it('should set url for Page', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" },"pull_request":{ "name":"Pull Request" } }'
+      );
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            pull_request: {
+              html_url: 'https://github.com/actions/checkout/pull/1180',
             },
           },
-        })
+        },
+      });
+      const result = updatePagePayload({ page_id: '1', url: true });
+      expect(result).toEqual({
+        page_id: '1',
+        properties: {
+          'Pull Request': {
+            url: 'https://github.com/actions/checkout/pull/1180',
+          },
+        },
+      });
+    });
+
+    it('should set relation for Page', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" },"pull_request":{ "name":"Pull Request" } }'
       );
 
-      const result = updatePagePayload({ page_id: '121' });
+      const result = updatePagePayload({ page_id: '1', state_id: '2' });
+      expect(result).toEqual({
+        page_id: '1',
+        properties: { 'Pull Request': { relation: [{ id: '2' }] } },
+      });
+    });
+
+    it('should set status and relation for Page', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" },"pull_request":{ "name":"Pull Request" } }'
+      );
+      setInput('closed', 'Completed');
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            action: 'closed',
+          },
+        },
+      });
+      const result = updatePagePayload({ page_id: '1', state_id: '2' });
+      expect(result).toEqual({
+        page_id: '1',
+        properties: {
+          'Notion Status': { status: { name: 'Completed' } },
+          'Pull Request': { relation: [{ id: '2' }] },
+        },
+      });
+    });
+
+    it('should set status and url for Page', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" },"pull_request":{ "name":"Pull Request" } }'
+      );
+      setInput('closed', 'Completed');
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            action: 'closed',
+            pull_request: {
+              html_url: 'https://github.com/actions/checkout/pull/1180',
+            },
+          },
+        },
+      });
+      const result = updatePagePayload({ page_id: '1' });
+      expect(result).toEqual({
+        page_id: '1',
+        properties: { 'Notion Status': { status: { name: 'Completed' } } },
+      });
+    });
+
+    it('should be undefined', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" },"pull_request":{ "name":"Pull Request" } }'
+      );
+      setInput('closed', 'Completed');
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            action: 'open',
+            pull_request: {
+              html_url: 'https://github.com/actions/checkout/pull/1180',
+            },
+          },
+        },
+      });
+      const result = updatePagePayload({ page_id: '1' });
       expect(result).toBeUndefined();
     });
-
-    it('should set status', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() =>
-        createMockInputs({
-          inputs: {
-            related_status: 'In progress',
-            right_delimiter: '](',
-            left_delimiter: ')',
-            notion_properties: {
-              status: {
-                name: 'Status',
-              },
-            },
-          },
-        })
-      );
-      const result = updatePagePayload({ page_id: '121' });
-      expect(result).toEqual({
-        page_id: '121',
-        properties: { Status: { status: { name: 'In progress' } } },
-      });
-    });
-
-    it('should set state', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() => createMockInputs());
-      const result = updatePagePayload({ page_id: '121', state_id: '2324' });
-      expect(result).toEqual({
-        page_id: '121',
-        properties: {
-          Status: { status: { name: 'In review' } },
-          'Pull Request': { relation: [{ id: '2324' }] },
-        },
-      });
-    });
-
-    it('should set url and status', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() => createMockInputs());
-      const result = updatePagePayload({
-        page_id: '121',
-        url: true,
-      });
-      expect(result).toEqual({
-        page_id: '121',
-        properties: {
-          Status: { status: { name: 'In review' } },
-          'Pull Request': { url: 'https://github.com/xxxxx/pull/11' },
-        },
-      });
-    });
   });
-  describe('updatePullRequestPayload', () => {
-    it('should be undefined', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() =>
-        createMockInputs({
-          inputs: {
-            related_status: 'In progress',
-            right_delimiter: '](',
-            left_delimiter: ')',
-            notion_properties: {
-              status: {
-                name: '',
-              },
-            },
-          },
-        })
-      );
-      const result = updatePullRequestPayload('121', '2324');
-      expect(result).toBeUndefined();
-    });
-
-    it('should have payload', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() => createMockInputs());
-      const result = updatePullRequestPayload('121', '2324');
-      expect(result).toEqual({
-        page_id: '121',
-        icon: {
-          external: { url: 'https://cdn.simpleicons.org/github/8B949E' },
-        },
-        properties: { 'Pull Request': { relation: [{ id: '2324' }] } },
-      });
-    });
-  });
-
   describe('addPullRequestPayload', () => {
-    it('should be undefined when PR relation column names not defined', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() =>
-        createMockInputs({
-          inputs: {
-            right_delimiter: '](',
-            left_delimiter: ')',
-            related_status: 'In review',
-            notion_properties: {
-              status: { name: 'Name' },
-              pull_request: { name: 'PR name' },
+    it('should have all properties', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } } }'
+      );
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            pull_request: {
+              body: 'description body',
+              html_url: 'https://github.com/actions/checkout/pull/1180',
+              number: 1180,
+              title: 'Add Ref and Commit outputs',
             },
           },
-        })
-      );
-      const result = addPullRequestPayload('121');
-      expect(result).toBeUndefined();
-    });
-
-    it('should have payload', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() => createMockInputs());
+        },
+      });
       const result = addPullRequestPayload('121');
       expect(result).toEqual({
         parent: { database_id: 'test' },
@@ -157,9 +187,11 @@ describe('payload', () => {
           external: { url: 'https://cdn.simpleicons.org/github/8B949E' },
         },
         properties: {
-          Title: { title: [{ text: { content: 'Lorem ipsum title' } }] },
-          Number: { number: 1 },
-          Link: { url: 'https://github.com/xxxxx/pull/11' },
+          Title: {
+            title: [{ text: { content: 'Add Ref and Commit outputs' } }],
+          },
+          Number: { number: 1180 },
+          Link: { url: 'https://github.com/actions/checkout/pull/1180' },
           State: { relation: [{ id: '121' }] },
         },
       });
@@ -167,32 +199,110 @@ describe('payload', () => {
   });
 
   describe('getPullRequestPayload', () => {
-    it('should be undefined when PR relation column names not defined', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() =>
-        createMockInputs({
-          inputs: {
-            right_delimiter: '](',
-            left_delimiter: ')',
-            related_status: 'In review',
-            notion_properties: {
-              status: { name: 'Name' },
-              pull_request: { name: 'PR name' },
+    it('should set filtering', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } } }'
+      );
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            pull_request: {
+              number: 1180,
             },
           },
-        })
+        },
+      });
+      const result = getPullRequestPayload();
+      expect(result).toEqual({
+        database_id: 'test',
+        filter: { and: [{ property: 'Number', number: { equals: 1180 } }] },
+      });
+    });
+
+    it('should be undefined when no relation', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request" } }'
       );
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            pull_request: {
+              number: 1180,
+            },
+          },
+        },
+      });
       const result = getPullRequestPayload();
       expect(result).toBeUndefined();
     });
 
-    it('should have payload', () => {
-      const mockedInputs = mockFunction(getInputs);
-      mockedInputs.mockImplementationOnce(() => createMockInputs());
+    it('should be undefined when no number', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } } }'
+      );
       const result = getPullRequestPayload();
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getPullRequestStatePayload', () => {
+    it('should set filtering', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } }, "pull_request_state":{ "name":"Name", "event_type":"Event" } }'
+      );
+      setInput('closed', 'Completed');
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {
+            action: 'closed',
+          },
+        },
+      });
+      const result = getPullRequestStatePayload();
       expect(result).toEqual({
         database_id: 'test',
-        filter: { and: [{ property: 'Number', number: { equals: 1 } }] },
+        filter: { and: [{ property: 'Event', title: { equals: 'closed' } }] },
+      });
+    });
+
+    it('should be undefined when no state on pull request', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } }, "pull_request_state":{ "name":"Name", "event_type":"Event" } }'
+      );
+      setInput('closed', 'Completed');
+      Object.defineProperty(github, 'context', {
+        value: {
+          payload: {},
+        },
+      });
+      const result = getPullRequestStatePayload();
+      expect(result).toBeUndefined();
+    });
+  });
+  describe('updatePullRequestPayload', () => {
+    it('should be undefined when property name not set', () => {
+      setInput('notion_properties', '{ "status":{ "name":"Notion Status" } }');
+      const result = updatePullRequestPayload('121', '22');
+      expect(result).toBeUndefined();
+    });
+
+    it('should have relation to state database', () => {
+      setInput(
+        'notion_properties',
+        '{ "status":{ "name":"Notion Status" }, "pull_request":{ "name":"Pull Request", "relation":{ "id":"Number", "link":"Link", "state":"State", "title":"Title" } }, "pull_request_state":{ "name":"Name", "event_type":"Event" } }'
+      );
+      const result = updatePullRequestPayload('121', '22');
+      expect(result).toEqual({
+        page_id: '121',
+        icon: {
+          external: { url: 'https://cdn.simpleicons.org/github/8B949E' },
+        },
+        properties: { State: { relation: [{ id: '22' }] } },
       });
     });
   });
