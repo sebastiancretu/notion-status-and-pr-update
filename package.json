@@ -41,7 +41,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@actions/core": "^2.0.1",
+    "@actions/core": "^3.0.0",
     "@actions/github": "^9.0.0",
     "@notionhq/client": "^5.9.0",
     "lodash": "^4.17.23"
