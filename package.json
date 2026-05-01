@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "@actions/core": "^3.0.1",
-    "@actions/github": "^9.0.0",
+    "@actions/github": "^9.1.1",
     "@notionhq/client": "^5.20.0",
     "lodash": "^4.18.1"
   }
