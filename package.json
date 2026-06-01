@@ -19,7 +19,7 @@
   "author": "Sebastian Cretu",
   "license": "ISC",
   "devDependencies": {
-    "@commitlint/cli": "^20.5.3",
+    "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^20.5.3",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
